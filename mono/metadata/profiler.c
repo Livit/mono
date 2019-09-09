@@ -857,8 +857,10 @@ mono_profiler_shutdown (void)
 {
 	ProfilerDesc *prof;
 	for (prof = prof_list; prof; prof = prof->next) {
-		if (prof->shutdown_callback)
-			prof->shutdown_callback (prof->profiler);
+		if (prof->shutdown_callback) {
+			prof->shutdown_callback(prof->profiler);
+			prof->shutdown_callback = NULL;
+		}
 	}
 }
 

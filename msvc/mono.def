@@ -672,6 +672,7 @@ mono_profiler_install_statistical
 mono_profiler_install_thread
 mono_profiler_install_transition
 mono_profiler_load
+mono_profiler_shutdown
 mono_profiler_set_events
 mono_property_get_flags
 mono_property_get_get_method
