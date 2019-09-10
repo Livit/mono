@@ -195,7 +195,7 @@ void mono_profiler_install_code_chunk_destroy (MonoProfilerCodeChunkDestroy call
 void mono_profiler_install_code_buffer_new (MonoProfilerCodeBufferNew callback);
 
 void mono_profiler_load             (const char *desc);
-void mono_profiler_shutdown         (void);
+void mono_profiler_shutdown_simple         (void);
 
 
 G_END_DECLS

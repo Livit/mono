@@ -1121,6 +1121,7 @@ mono_profiler_coverage_get (MonoProfiler *prof, MonoMethod *method, MonoProfileC
  */
 
 static FILE* poutput = NULL;
+static unsigned char is_file_open = 0;
 
 #define USE_X86TSC 0
 #define USE_WIN32COUNTER 0
@@ -2018,6 +2019,8 @@ mono_profiler_install_simple (const char *desc)
 					poutput = stdout;
 					fprintf (stderr, "profiler : cannot open profile output file '%s'.\n", arg + 5);
 				}
+				else
+					is_file_open = 1;
 			} else {
 				fprintf (stderr, "profiler : Unknown argument '%s'.\n", arg);
 				return;
@@ -2045,6 +2048,16 @@ mono_profiler_install_simple (const char *desc)
 	mono_profiler_install_appdomain (NULL, simple_appdomain_load, simple_appdomain_unload, NULL);
 	mono_profiler_install_statistical (simple_stat_hit);
 	mono_profiler_set_events (flags);
+}
+
+void
+mono_profiler_shutdown_simple (void)
+{
+	mono_profiler_shutdown ();
+
+	if (!poutput && is_file_open)
+		fclose (poutput);
+	is_file_open = 0;
 }
 
 #endif /* DISABLE_PROFILER */
