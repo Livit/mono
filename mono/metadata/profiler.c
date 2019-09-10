@@ -2050,14 +2050,16 @@ mono_profiler_install_simple (const char *desc)
 	mono_profiler_set_events (flags);
 }
 
-void
+void 
 mono_profiler_shutdown_simple (void)
 {
-	mono_profiler_shutdown ();
+    mono_profiler_shutdown ();
 
-	if (!poutput && is_file_open)
-		fclose (poutput);
-	is_file_open = 0;
+    if (poutput && is_file_open) {
+        fclose (poutput);
+        poutput = NULL;
+    }
+    is_file_open = 0;
 }
 
 #endif /* DISABLE_PROFILER */
