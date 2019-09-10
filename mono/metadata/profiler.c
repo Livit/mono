@@ -1122,6 +1122,21 @@ mono_profiler_coverage_get (MonoProfiler *prof, MonoMethod *method, MonoProfileC
 
 static FILE* poutput = NULL;
 static unsigned char is_file_open = 0;
+static short volatile is_profiler_started = 0;
+
+#ifdef PLATFORM_WIN32
+#define COMPARE_EXCHANGE(dest, exchange, comparand) InterlockedCompareExchange16(dest, exchange, comparand)
+#else
+static short
+compare_exchange(short* dest, short exchange, short comparand)
+{
+    short initial = *dest;
+    if (*dest == comparand)
+        *dest = exchange;
+    return initial;
+}
+#define COMPARE_EXCHANGE(dest, exchange, comparand) compare_exchange(dest, exchange, comparand)
+#endif // PLATFORM_WIN32
 
 #define USE_X86TSC 0
 #define USE_WIN32COUNTER 0
@@ -2053,6 +2068,9 @@ mono_profiler_install_simple (const char *desc)
 void 
 mono_profiler_shutdown_simple (void)
 {
+    if (!COMPARE_EXCHANGE (&is_profiler_started, 0, 1))
+        return;
+
     mono_profiler_shutdown ();
 
     if (poutput && is_file_open) {
@@ -2080,6 +2098,9 @@ typedef void (*ProfilerInitializer) (const char*);
 void 
 mono_profiler_load (const char *desc)
 {
+    if (COMPARE_EXCHANGE (&is_profiler_started, 1, 0))
+        return;
+
 	mono_gc_base_init ();
 
 #ifndef DISABLE_PROFILER
